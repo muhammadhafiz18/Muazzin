@@ -1,9 +1,6 @@
 ﻿using Microsoft.Azure.Functions.Worker.Http;
 using Newtonsoft.Json;
-using System.IO;
-using System.Threading.Tasks;
 using WebAPI.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace WebAPI
 {
