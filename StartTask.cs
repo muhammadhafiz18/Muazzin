@@ -31,7 +31,7 @@ namespace WebAPI
 
             var requestData = new Dictionary<string, string>
             {
-                { "chat_id",  message.Chat.Id },
+                { "chat_id",  message.From.UserID },
                 { "text", "Assalomu alaykum. Ushbu 'Muazzin' boti har namoz vaqtida sizga havar yuboradi. Iltimos joylashuvingizni tanlang: " },
                 { "reply_markup", inlineKeyboardJson }
             };

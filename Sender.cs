@@ -20,7 +20,7 @@ namespace WebAPI
 
             var payload = new
             {
-                chat_id = message.Chat.Id,
+                chat_id = message.From.UserID,
                 text = replyMessage
             };
 
@@ -49,7 +49,7 @@ namespace WebAPI
 
             var payload = new
             {
-                chat_id = message.Chat.Id,
+                chat_id = message.From.UserID,
                 message_id = message.MessageId,
                 text = $"Your city is {message.From.CityOfUser}",
                 reply_markup = new { inline_keyboard = new object[0] } // Empty inline keyboard to disable it

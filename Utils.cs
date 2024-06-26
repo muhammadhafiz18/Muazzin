@@ -33,15 +33,11 @@ namespace WebAPI
                     Text = payload.message.text,
                     From = new Chat
                     {
-                        Id = payload.message.from.id,
+                        UserID = payload.message.from.id,
                         FirstName = payload.message.from.first_name,
                         LastName = payload.message.from.last_name,
                         UserName = payload.message.from.username,
                     },
-                    Chat = new Chat
-                    {
-                        Id = payload.message.chat.id // Assuming the chat ID should be filled similarly
-                    }
                 };
             }
             else if (payload?.callback_query != null)
@@ -52,15 +48,11 @@ namespace WebAPI
                     Text = payload.callback_query.message.text,
                     From = new Chat
                     {
-                        Id = payload.callback_query.from.id,
+                        UserID = payload.callback_query.from.id,
                         FirstName = payload.callback_query.from.first_name,
                         LastName = payload.callback_query.from.last_name,
                         UserName = payload.callback_query.from.username,
                         CityOfUser = payload.callback_query.data
-                    },
-                    Chat = new Chat
-                    {
-                        Id = payload.callback_query.message.chat.id // Assuming the chat ID should be filled similarly
                     },
                 };
             }
