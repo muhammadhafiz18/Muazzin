@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Globalization;
 using System.Text;
 using WebAPI.Models;
 
@@ -47,11 +49,70 @@ namespace WebAPI
             string telegramBotToken = configuration["TelegramBotToken"];
             var telegramApiUrl = $"https://api.telegram.org/bot{telegramBotToken}/editMessageText";
 
+            // getting current date in Gregorian calendar
+            DateTime currentDate = DateTime.Today;
+
+            // Getting components
+            int year = currentDate.Year;
+            int month = currentDate.Month;
+            int day = currentDate.Day;
+
+            // getting hijri date
+            System.Globalization.HijriCalendar hijriCalendar = new System.Globalization.HijriCalendar();
+
+            // Convert today's date to Hijri
+            int hijriYear = hijriCalendar.GetYear(currentDate);
+            int hijriMonth = hijriCalendar.GetMonth(currentDate);
+            int hijriDay = hijriCalendar.GetDayOfMonth(currentDate);
+
+            string jsonFilePath = "C:\\Users\\Muhammad\\Desktop\\PrayerTimesOfUzbekistan.json";
+
+            // Read the JSON file as a string
+            string jsonString = File.ReadAllText(jsonFilePath);
+
+            // Parse the JSON string into a JObject
+            JObject jsonObject = JObject.Parse(jsonString);
+
+            // Build the path to access the desired element
+            string path = $"$.{message.From.CityOfUser.First().ToString().ToUpper() + message.From.CityOfUser.Substring(1).ToLower()}[{month - 1}].monthData[{day - 1}]";
+
+            // Select the token based on the path
+            JToken value = jsonObject.SelectToken(path);
+            var prayerTimes = new PrayerTimes();
+
+            prayerTimes = new PrayerTimes
+            {
+                CityName = value[0].ToString(),
+                Month = new NamesOfMonth
+                {
+                    Hijri = value[1][0].ToString(),
+                    Qamari = value[1][1].ToString()
+                },
+                DayInHijri = value[2].ToString(),
+                DayInQamari = value[3].ToString(),
+                DayOfWeek = value[4].ToString(),
+                Fajr = value[5].ToString(),
+                Sunrise = value[6].ToString(),
+                Zuhr = value[7].ToString(),
+                Asr = value[8].ToString(),
+                Magrib = value[9].ToString(),
+                Isha = value[10].ToString(),
+            };
+
             var payload = new
             {
                 chat_id = message.From.UserID,
                 message_id = message.MessageId,
-                text = $"Your city is {message.From.CityOfUser}",
+                text = $"Bugun: {prayerTimes.DayInQamari}/{prayerTimes.Month.Qamari}/{year}\n" +
+                       $"Hijriy: {prayerTimes.DayInHijri}/{prayerTimes.Month.Hijri}/{hijriYear}\n" +
+                       $"{prayerTimes.CityName} namoz vaqtlari:\n" +
+                       $"🏙 Bomdod: {prayerTimes.Fajr}\n" +
+                       $"🌅 Quyosh: {prayerTimes.Sunrise}\n" +
+                       $"🏞 Peshin: {prayerTimes.Zuhr}\n" +
+                       $"🌆 Asr: {prayerTimes.Asr}\n" +
+                       $"🌉 Shom: {prayerTimes.Magrib}\n" +
+                       $"🌃 Xufton: {prayerTimes.Isha}"
+,
                 reply_markup = new { inline_keyboard = new object[0] } // Empty inline keyboard to disable it
             };
 
