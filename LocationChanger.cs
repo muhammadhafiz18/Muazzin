@@ -1,18 +1,25 @@
-﻿using Newtonsoft.Json;
-using WebAPI.Models;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Azure.Functions.Worker.Http;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using WebAPI.Models;
 
 namespace WebAPI
 {
-    public class StartTask
+    public class LocationChanger
     {
         private static readonly HttpClient _httpClient = new HttpClient();
 
-        public async Task<bool> ChoosingCityNameAsync(Message message, ILogger _logger, IConfiguration configuration, HttpRequestData req)
+        public async Task<bool> ChangingLocation(Message message, ILogger _logger, IConfiguration configuration, string CurrentCityOfUser)
         {
             string telegramBotToken = configuration["TelegramBotToken"];
+
+            var telegramApiUrl = $"https://api.telegram.org/bot{telegramBotToken}/sendMessage";
             List<string> places = new List<string>
             {
                 "Ангрен", "Андижон", "Арнасой", "Ашхабод", "Бекобод", "Бишкек", "Бойсун", "Булоқбоши", "Бухоро", "Бурчмулла",
@@ -26,13 +33,16 @@ namespace WebAPI
                 "Янгибозор", "Зарафшон", "Зомин"
             };
 
+            string currentCityOfUser = CurrentCityOfUser;
+
             var inlineKeyboard = CreateInlineKeyboard(places);
             var inlineKeyboardJson = JsonConvert.SerializeObject(inlineKeyboard);
 
             var requestData = new Dictionary<string, string>
             {
                 { "chat_id",  message.From.UserID },
-                { "text", "Assalomu alaykum. Ushbu 'Muazzin' boti har namoz vaqtida sizga habar yuboradi.\nIltimos joylashuvingizni tanlang: " },
+                { "text", $"Sizning joylashuvingiz: {CurrentCityOfUser}\n" +
+                          $"Yangi joylashuvingizni tanlang" },
                 { "reply_markup", inlineKeyboardJson }
             };
 
@@ -47,6 +57,7 @@ namespace WebAPI
                     _logger.LogError($"Failed to send message. Status code: {response.StatusCode}, Reason: {response.ReasonPhrase}");
                     return false;
                 }
+                
                 return true;
             }
             catch (Exception ex)
@@ -55,7 +66,6 @@ namespace WebAPI
                 return false;
             }
         }
-
         static InlineKeyboardMarkup CreateInlineKeyboard(List<string> cities)
         {
             const int buttonsPerRow = 3; // Adjust as needed
@@ -76,3 +86,4 @@ namespace WebAPI
         }
     }
 }
+

@@ -12,13 +12,13 @@ namespace WebAPI
     {
         private static readonly HttpClient _httpClient = new HttpClient();
 
-        public async Task<bool> SendMessageAsync(Message message, ILogger _logger, IConfiguration configuration)
+        public async Task<bool> SendMessageAsync(Message message, ILogger _logger, IConfiguration configuration, string? InfoAboutChangedLocation, string? Welcome, string? FeedbackSection, string? NothingIsSent, string? Statistic)
         {
             string telegramBotToken = configuration["TelegramBotToken"];
 
             var telegramApiUrl = $"https://api.telegram.org/bot{telegramBotToken}/sendMessage";
 
-            string replyMessage = $"Ho'sh, '{message.Text}' bu nima digani endi ???";
+            string replyMessage = $"{InfoAboutChangedLocation}{Welcome}{FeedbackSection}{NothingIsSent}{Statistic}!";
 
             var payload = new
             {
