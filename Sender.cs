@@ -104,8 +104,8 @@ namespace WebAPI
                 chat_id = message.From.UserID,
                 message_id = message.MessageId,
                 text = $"Bugun: {prayerTimes.DayInQamari}/{prayerTimes.Month.Qamari}/{year}\n" +
-                       $"Hijriy: {prayerTimes.DayInHijri}/{prayerTimes.Month.Hijri}/{hijriYear}\n" +
-                       $"{prayerTimes.CityName} namoz vaqtlari:\n" +
+                       $"Hijriy: {prayerTimes.DayInHijri}/{prayerTimes.Month.Hijri}/{hijriYear}\n\n" +
+                       $"{prayerTimes.CityName} namoz vaqtlari:\n\n" +
                        $"🏙 Bomdod: {prayerTimes.Fajr}\n" +
                        $"🌅 Quyosh: {prayerTimes.Sunrise}\n" +
                        $"🏞 Peshin: {prayerTimes.Zuhr}\n" +
