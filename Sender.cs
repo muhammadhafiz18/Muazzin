@@ -116,13 +116,14 @@ namespace WebAPI
                     Magrib = value[9].ToString(),
                     Isha = value[10].ToString(),
                 };
+                string cityNameInLatin = CyrillicToLatinConverter.ConvertToLatin(prayerTimes.CityName);
 
                 var payload = new
                 {
                     chat_id = message.From.UserID,
                     message_id = message.MessageId,
                     text = $"Bugun: {prayerTimes.DayInQamari}/{month}/{year}\n" +
-                            $"{prayerTimes.CityName} namoz vaqtlari:\n\n" +
+                            $"{cityNameInLatin} namoz vaqtlari:\n" +
                             $"🏙 Bomdod: {prayerTimes.Fajr}\n" +
                             $"🌅 Quyosh: {prayerTimes.Sunrise}\n" +
                             $"🏞 Peshin: {prayerTimes.Zuhr}\n" +

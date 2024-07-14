@@ -38,10 +38,12 @@ namespace WebAPI
             var inlineKeyboard = CreateInlineKeyboard(places);
             var inlineKeyboardJson = JsonConvert.SerializeObject(inlineKeyboard);
 
+            string cityNameInLatin = CyrillicToLatinConverter.ConvertToLatin(currentCityOfUser);
+
             var requestData = new Dictionary<string, string>
             {
                 { "chat_id",  message.From.UserID },
-                { "text", $"Sizning joylashuvingiz: {CurrentCityOfUser}\n" +
+                { "text", $"Sizning joylashuvingiz: {cityNameInLatin}\n" +
                           $"Yangi joylashuvingizni tanlang" },
                 { "reply_markup", inlineKeyboardJson }
             };
