@@ -111,10 +111,11 @@ namespace WebAPI
                 var dailyPrayerTime = dailyPrayerTimes.FirstOrDefault(d => d[0]?.ToString() == city);
                 if (dailyPrayerTime == null) continue;
 
+                string cityNameInLatin = CyrillicToLatinConverter.ConvertToLatin(dailyPrayerTime[0].ToString());
                 foreach (var userId in userIds)
                 {
                     var message = new StringBuilder();
-                    message.AppendLine($"Assalomu alaykum. {dailyPrayerTime[0]}da bugungi namoz vaqtlari\n");
+                    message.AppendLine($"Assalomu alaykum. {cityNameInLatin}da bugungi namoz vaqtlari\n");
                     message.AppendLine($"Bugun: {day}.{month}.2024\n");
                     message.AppendLine($"Namoz vaqtlari:");
                     message.AppendLine($"🏙 Bomdod: {dailyPrayerTime[5]}");
@@ -139,10 +140,11 @@ namespace WebAPI
                 var dailyPrayerTime = dailyPrayerTimes.FirstOrDefault(d => d[0]?.ToString() == city);
                 if (dailyPrayerTime == null) continue;
 
+                string cityNameInLatin = CyrillicToLatinConverter.ConvertToLatin(dailyPrayerTime[0].ToString());
                 foreach (var userId in userIds)
                 {
                     var message = new StringBuilder();
-                    message.AppendLine($"Assalomu alaykum. {dailyPrayerTime[0]}da bugungi namoz vaqtlari\n");
+                    message.AppendLine($"Assalomu alaykum. {cityNameInLatin}da bugungi namoz vaqtlari\n");
                     message.AppendLine($"Bugun: {day}.{month}.2024");
                     message.AppendLine($"Hijriy: {hijriDay}.{hijriMonth}.{hijriYear}\n");
                     message.AppendLine($"Namoz vaqtlari:");
@@ -175,6 +177,7 @@ namespace WebAPI
 
                 foreach (var dailyPrayerTime in dailyPrayerTimes)
                 {
+                    string cityNameInLatin = CyrillicToLatinConverter.ConvertToLatin(dailyPrayerTime[0].ToString());
                     for (int i = 5; i <= 10; i++)
                     {
                         if (dailyPrayerTime[i]?.ToString() != specificTime.ToString(@"hh\:mm")) continue;
@@ -182,12 +185,12 @@ namespace WebAPI
                         long[] userIds = detailsOfUsers[dailyPrayerTime[0].ToString()];
                         string message = i switch
                         {
-                            5 => $"🏙 {dailyPrayerTime[0]} da bomdod vaqti bo'ldi\n\n@MuazzinUz_bot",
-                            6 => $"🌅 {dailyPrayerTime[0]} da bomdod vaqti o'tib ketti\n\n@MuazzinUz_bot",
-                            7 => $"🏞 {dailyPrayerTime[0]} da peshin vaqti bo'ldi\n\n@MuazzinUz_bot",
-                            8 => $"🌆 {dailyPrayerTime[0]} da asr vaqti bo'ldi\n\n@MuazzinUz_bot",
-                            9 => $"🌉 {dailyPrayerTime[0]} da shom vaqti bo'ldi\n\n@MuazzinUz_bot",
-                            10 => $"🌃 {dailyPrayerTime[0]} da xufton vaqti bo'ldi\n\n@MuazzinUz_bot",
+                            5 => $"🏙 {cityNameInLatin}da bomdod vaqti bo'ldi\n\n@MuazzinUz_bot",
+                            6 => $"🌅 {cityNameInLatin}da bomdod vaqti o'tib ketti\n\n@MuazzinUz_bot",
+                            7 => $"🏞 {cityNameInLatin}da peshin vaqti bo'ldi\n\n@MuazzinUz_bot",
+                            8 => $"🌆 {cityNameInLatin}da asr vaqti bo'ldi\n\n@MuazzinUz_bot",
+                            9 => $"🌉 {cityNameInLatin}da shom vaqti bo'ldi\n\n@MuazzinUz_bot",
+                            10 => $"🌃 {cityNameInLatin}da xufton vaqti bo'ldi\n\n@MuazzinUz_bot",
                             _ => string.Empty
                         };
 
