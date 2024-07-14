@@ -17,7 +17,7 @@ namespace WebAPI
 
         public async Task<bool> ChangingLocation(Message message, ILogger _logger, IConfiguration configuration, string CurrentCityOfUser)
         {
-            string telegramBotToken = configuration["TelegramBotToken"];
+            string telegramBotToken = "7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA";
 
             var telegramApiUrl = $"https://api.telegram.org/bot{telegramBotToken}/sendMessage";
             List<string> places = new List<string>

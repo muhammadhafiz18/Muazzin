@@ -12,7 +12,7 @@ namespace WebAPI
 
         public async Task<bool> ChoosingCityNameAsync(Message message, ILogger _logger, IConfiguration configuration, HttpRequestData req)
         {
-            string telegramBotToken = configuration["TelegramBotToken"];
+            string telegramBotToken = "7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA";
             List<string> places = new List<string>
             {
                 "Ангрен", "Андижон", "Арнасой", "Ашхабод", "Бекобод", "Бишкек", "Бойсун", "Булоқбоши", "Бухоро", "Бурчмулла",
