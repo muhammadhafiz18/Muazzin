@@ -36,7 +36,8 @@ namespace WebAPI
         {
 
             string mainLogoPictureUrl = await GetBlobUrlAsync(containerName, "Muazzin Main Logo.jpg");
-            
+            string mainLogoPictureUrlRu = await GetBlobUrlAsync(containerName, "Muazzin Main Logo Ru.jpg");
+
             var userDetails = new UserDetails();
             var allUsers = await userDetails.UserDetailGetter();
             
@@ -77,6 +78,8 @@ namespace WebAPI
             int hijriYear = hijriCalendar.GetYear(utcNow);
             var dailyPrayerTimesGetter = new DailyPrayerTimesAndUserDetailsGetter();
             var specificTimesGetter = new AllSpecificTimesGetter();
+            var userDetailsFromBlob = new UserDetails();
+            List<Chat> userDetailsFromJson = await userDetailsFromBlob.UserDetailGetter();
 
             var (dailyPrayerTimes, detailsOfUsers) = await dailyPrayerTimesGetter.GetDailyPrayerTimes(month, day, allUsers);
             if (!dailyPrayerTimes.Any() || !detailsOfUsers.Any())
@@ -90,18 +93,71 @@ namespace WebAPI
 
             if (formattedTime == "01:00:00")
             {
-                await SendDailyPrayerTimesMessageAtNight(detailsOfUsers, dailyPrayerTimes, month, day, pictureSender, mainLogoPictureUrl);
+                await SendDailyPrayerTimesMessageAtNight(detailsOfUsers, dailyPrayerTimes, month, day, pictureSender, mainLogoPictureUrl, userDetailsFromJson, mainLogoPictureUrlRu);
                 return;
             } else if (formattedTime == "13:00:00")
             {
-                await SendDailyPrayerTimesMessageAtNoon(detailsOfUsers, dailyPrayerTimes, month, day, hijriDay, hijriMonth, hijriYear, pictureSender, mainLogoPictureUrl);
+                await SendDailyPrayerTimesMessageAtNoon(detailsOfUsers, dailyPrayerTimes, month, day, hijriDay, hijriMonth, hijriYear, pictureSender, mainLogoPictureUrl, userDetailsFromJson, mainLogoPictureUrlRu);
                 return;
             }
 
-            await CheckAndSendSpecificTimeNotifications(formattedTime, allSpecificTimes, dailyPrayerTimes, detailsOfUsers, pictureSender);
+            await CheckAndSendSpecificTimeNotifications(formattedTime, allSpecificTimes, dailyPrayerTimes, detailsOfUsers, pictureSender, userDetailsFromJson);
         }
 
-        private async Task SendDailyPrayerTimesMessageAtNight(Dictionary<string, long[]> detailsOfUsers, List<JToken> dailyPrayerTimes, int month, int day, PictureSender pictureSender, string photoUrl)
+        private async Task SendDailyPrayerTimesMessageAtNight(Dictionary<string, long[]> detailsOfUsers, List<JToken> dailyPrayerTimes, int month, int day, PictureSender pictureSender, string photoUrl, List<Chat> userDetailsFromBLob, string photoUrlRu)
+        {
+            foreach (var kvp in detailsOfUsers)
+            {
+                string city = kvp.Key;
+                long[] userIds = kvp.Value;
+                var dailyPrayerTime = dailyPrayerTimes.FirstOrDefault(d => d[0]?.ToString() == city);
+                if (dailyPrayerTime == null) continue;
+
+                string cityNameInLatin = CyrillicToLatinConverter.ConvertToLatin(dailyPrayerTime[0].ToString());
+                foreach (var userId in userIds)
+                {
+                    string language = userDetailsFromBLob
+                                .Where(u => long.Parse(u.UserID) == userId)
+                                .Select(u => u.Language)
+                                .FirstOrDefault();
+
+                    bool success;
+                    if (language == "Ru")
+                    {
+                        var message = new StringBuilder();
+                        message.AppendLine($"Ассаляму алейкум. Сегодняшнее время молитвы {dailyPrayerTime[0].ToString()}а\n");
+                        message.AppendLine($"Сегодня: {day}.{month}.2024\n");
+                        message.AppendLine($"Время молитвы:");
+                        message.AppendLine($"🏙 Фаджр: {dailyPrayerTime[5]}");
+                        message.AppendLine($"🌅 Шурук: {dailyPrayerTime[6]}");
+                        message.AppendLine($"🏞 Зухр: {dailyPrayerTime[7]}");
+                        message.AppendLine($"🌆 Аср: {dailyPrayerTime[8]}");
+                        message.AppendLine($"🌉 Магриб: {dailyPrayerTime[9]}");
+                        message.AppendLine($"🌃 Иша: {dailyPrayerTime[10]}\n\n@MuazzinUz_bot");
+                        success = await pictureSender.SendPictureAsync(userId, photoUrlRu, message.ToString(), "7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA");
+                        _logger.LogInformation(success ? $"Daily prayer times list sent successfully to {userId}" : $"Message wasn't sent to {userId}");
+                    } 
+                    else
+                    {
+                        var message = new StringBuilder();
+                        message.AppendLine($"Assalomu alaykum. {cityNameInLatin}da bugungi namoz vaqtlari\n");
+                        message.AppendLine($"Bugun: {day}.{month}.2024\n");
+                        message.AppendLine($"Namoz vaqtlari:");
+                        message.AppendLine($"🏙 Bomdod: {dailyPrayerTime[5]}");
+                        message.AppendLine($"🌅 Quyosh: {dailyPrayerTime[6]}");
+                        message.AppendLine($"🏞 Peshin: {dailyPrayerTime[7]}");
+                        message.AppendLine($"🌆 Asr: {dailyPrayerTime[8]}");
+                        message.AppendLine($"🌉 Shom: {dailyPrayerTime[9]}");
+                        message.AppendLine($"🌃 Xufton: {dailyPrayerTime[10]}\n\n@MuazzinUz_bot");
+                        success = await pictureSender.SendPictureAsync(userId, photoUrl, message.ToString(), "7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA");
+                        _logger.LogInformation(success ? $"Daily prayer times list sent successfully to {userId}" : $"Message wasn't sent to {userId}");
+
+                    }
+                }
+            }
+        }
+
+        private async Task SendDailyPrayerTimesMessageAtNoon(Dictionary<string, long[]> detailsOfUsers, List<JToken> dailyPrayerTimes, int month, int day, int hijriDay, int hijriMonth, int hijriYear, PictureSender pictureSender, string photoUrl, List<Chat> userDetailsFromBLob, string photoUrlRu)
         {
 
             foreach (var kvp in detailsOfUsers)
@@ -114,54 +170,50 @@ namespace WebAPI
                 string cityNameInLatin = CyrillicToLatinConverter.ConvertToLatin(dailyPrayerTime[0].ToString());
                 foreach (var userId in userIds)
                 {
-                    var message = new StringBuilder();
-                    message.AppendLine($"Assalomu alaykum. {cityNameInLatin}da bugungi namoz vaqtlari\n");
-                    message.AppendLine($"Bugun: {day}.{month}.2024\n");
-                    message.AppendLine($"Namoz vaqtlari:");
-                    message.AppendLine($"🏙 Bomdod: {dailyPrayerTime[5]}");
-                    message.AppendLine($"🌅 Quyosh: {dailyPrayerTime[6]}");
-                    message.AppendLine($"🏞 Peshin: {dailyPrayerTime[7]}");
-                    message.AppendLine($"🌆 Asr: {dailyPrayerTime[8]}");
-                    message.AppendLine($"🌉 Shom: {dailyPrayerTime[9]}");
-                    message.AppendLine($"🌃 Xufton: {dailyPrayerTime[10]}\n\n@MuazzinUz_bot");
-                    bool success = await pictureSender.SendPictureAsync(userId, photoUrl, message.ToString(), "7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA");
-                    _logger.LogInformation(success ? $"Daily prayer times list sent successfully to {userId}" : $"Message wasn't sent to {userId}");
+                    string language = userDetailsFromBLob
+                                .Where(u => long.Parse(u.UserID) == userId)
+                                .Select(u => u.Language)
+                                .FirstOrDefault();
+
+                    bool success;
+                    if (language == "Ru")
+                    {
+                        var message = new StringBuilder();
+                        message.AppendLine($"Ассаляму алейкум. Сегодняшнее время молитвы {dailyPrayerTime[0].ToString()}а\n");
+                        message.AppendLine($"Сегодня: {day}.{month}.2024\n");
+                        message.AppendLine($"Хижрий: {hijriDay}.{hijriMonth}.{hijriYear}\n");
+                        message.AppendLine($"Время молитвы:");
+                        message.AppendLine($"🏙 Фаджр: {dailyPrayerTime[5]}");
+                        message.AppendLine($"🌅 Шурук: {dailyPrayerTime[6]}");
+                        message.AppendLine($"🏞 Зухр: {dailyPrayerTime[7]}");
+                        message.AppendLine($"🌆 Аср: {dailyPrayerTime[8]}");
+                        message.AppendLine($"🌉 Магриб: {dailyPrayerTime[9]}");
+                        message.AppendLine($"🌃 Иша: {dailyPrayerTime[10]}\n\n@MuazzinUz_bot");
+                        success = await pictureSender.SendPictureAsync(userId, photoUrlRu, message.ToString(), "7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA");
+                        _logger.LogInformation(success ? $"Daily prayer times list sent successfully to {userId}" : $"Message wasn't sent to {userId}");
+                    }
+                    else
+                    {
+                        var message = new StringBuilder();
+                        message.AppendLine($"Assalomu alaykum. {cityNameInLatin}da bugungi namoz vaqtlari\n");
+                        message.AppendLine($"Bugun: {day}.{month}.2024\n");
+                        message.AppendLine($"Hijriy: {hijriDay}.{hijriMonth}.{hijriYear}\n");
+                        message.AppendLine($"Namoz vaqtlari:");
+                        message.AppendLine($"🏙 Bomdod: {dailyPrayerTime[5]}");
+                        message.AppendLine($"🌅 Quyosh: {dailyPrayerTime[6]}");
+                        message.AppendLine($"🏞 Peshin: {dailyPrayerTime[7]}");
+                        message.AppendLine($"🌆 Asr: {dailyPrayerTime[8]}");
+                        message.AppendLine($"🌉 Shom: {dailyPrayerTime[9]}");
+                        message.AppendLine($"🌃 Xufton: {dailyPrayerTime[10]}\n\n@MuazzinUz_bot");
+                        success = await pictureSender.SendPictureAsync(userId, photoUrl, message.ToString(), "7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA");
+                        _logger.LogInformation(success ? $"Daily prayer times list sent successfully to {userId}" : $"Message wasn't sent to {userId}");
+
+                    }
                 }
             }
         }
 
-        private async Task SendDailyPrayerTimesMessageAtNoon(Dictionary<string, long[]> detailsOfUsers, List<JToken> dailyPrayerTimes, int month, int day, int hijriDay, int hijriMonth, int hijriYear, PictureSender pictureSender, string photoUrl)
-        {
-
-            foreach (var kvp in detailsOfUsers)
-            {
-                string city = kvp.Key;
-                long[] userIds = kvp.Value;
-                var dailyPrayerTime = dailyPrayerTimes.FirstOrDefault(d => d[0]?.ToString() == city);
-                if (dailyPrayerTime == null) continue;
-
-                string cityNameInLatin = CyrillicToLatinConverter.ConvertToLatin(dailyPrayerTime[0].ToString());
-                foreach (var userId in userIds)
-                {
-                    var message = new StringBuilder();
-                    message.AppendLine($"Assalomu alaykum. {cityNameInLatin}da bugungi namoz vaqtlari\n");
-                    message.AppendLine($"Bugun: {day}.{month}.2024");
-                    message.AppendLine($"Hijriy: {hijriDay}.{hijriMonth}.{hijriYear}\n");
-                    message.AppendLine($"Namoz vaqtlari:");
-                    message.AppendLine($"🏙 Bomdod: {dailyPrayerTime[5]}");
-                    message.AppendLine($"🌅 Quyosh: {dailyPrayerTime[6]}");
-                    message.AppendLine($"🏞 Peshin: {dailyPrayerTime[7]}");
-                    message.AppendLine($"🌆 Asr: {dailyPrayerTime[8]}");
-                    message.AppendLine($"🌉 Shom: {dailyPrayerTime[9]}");
-                    message.AppendLine($"🌃 Xufton: {dailyPrayerTime[10]}\n\n@MuazzinUz_bot");
-
-                    bool success = await pictureSender.SendPictureAsync(userId, photoUrl, message.ToString(), "7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA");
-                    _logger.LogInformation(success ? $"Daily prayer times list sent successfully to {userId}" : $"Message wasn't sent to {userId}");
-                }
-            }
-        }
-
-        private async Task CheckAndSendSpecificTimeNotifications(string formattedTime, (int hour, int minute)[] allSpecificTimes, List<JToken> dailyPrayerTimes, Dictionary<string, long[]> detailsOfUsers, PictureSender pictureSender)
+        private async Task CheckAndSendSpecificTimeNotifications(string formattedTime, (int hour, int minute)[] allSpecificTimes, List<JToken> dailyPrayerTimes, Dictionary<string, long[]> detailsOfUsers, PictureSender pictureSender, List<Chat> userDetailsFromBLob)
         {
             string bomdodPictureUrl = await GetBlobUrlAsync(containerName, "Muazzin_bomdod.jpg");
             string quyoshPictureUrl = await GetBlobUrlAsync(containerName, "Muazzin_quyosh.jpg");
@@ -169,6 +221,13 @@ namespace WebAPI
             string asrPictureUrl = await GetBlobUrlAsync(containerName, "Muazzin_asr.jpg");
             string shomPictureUrl = await GetBlobUrlAsync(containerName, "Muazzin_shom.jpg");
             string xuftonPictureUrl = await GetBlobUrlAsync(containerName, "Muazzin_xufton.jpg");
+
+            string bomdodPictureUrlRu = await GetBlobUrlAsync(containerName, "Muazzin_bomdod_ru.jpg");
+            string quyoshPictureUrlRu = await GetBlobUrlAsync(containerName, "Muazzin_quyosh_ru.jpg");
+            string peshinPictureUrlRu = await GetBlobUrlAsync(containerName, "Muazzin_peshin_ru.jpg");
+            string asrPictureUrlRu = await GetBlobUrlAsync(containerName, "Muazzin_asr_ru.jpg");
+            string shomPictureUrlRu = await GetBlobUrlAsync(containerName, "Muazzin_shom_ru.jpg");
+            string xuftonPictureUrlRu = await GetBlobUrlAsync(containerName, "Muazzin_xufton_ru.jpg");
             foreach (var time in allSpecificTimes)
             {
                 var specificTime = new TimeSpan(time.hour, time.minute, 0);
@@ -193,40 +252,88 @@ namespace WebAPI
                             10 => $"🌃 {cityNameInLatin}da xufton vaqti bo'ldi\n\n@MuazzinUz_bot",
                             _ => string.Empty
                         };
+                        string messageInRussian = i switch
+                        {
+                            5 => $"🏙 В {dailyPrayerTime[0].ToString()}е фаджр.\n\n@MuazzinUz_bot",
+                            6 => $"🌅 В {dailyPrayerTime[0].ToString()}е рассвет\n\n@MuazzinUz_bot",
+                            7 => $"🏞 В {dailyPrayerTime[0].ToString()}е зухр\n\n@MuazzinUz_bot",
+                            8 => $"🌆 В {dailyPrayerTime[0].ToString()}е аср\n\n@MuazzinUz_bot",
+                            9 => $"🌉 В {dailyPrayerTime[0].ToString()}е магриб\n\n@MuazzinUz_bot",
+                            10 => $"🌃 В {dailyPrayerTime[0].ToString()}е иша\n\n@MuazzinUz_bot",
+                            _ => string.Empty
+                        };
 
                         string photoUrl;
 
-                        if (i == 5)
-                        {
-                            photoUrl = bomdodPictureUrl;
-                        } 
-                        else if (i == 6)
-                        {
-                            photoUrl = quyoshPictureUrl;
-                        }
-                        else if (i == 7)
-                        {
-                            photoUrl = peshinPictureUrl;
-                        }
-                        else if (i == 8)
-                        {
-                            photoUrl = asrPictureUrl;
-                        }
-                        else if (i == 9)
-                        {
-                            photoUrl = shomPictureUrl;
-                        }
-                        else
-                        {
-                            photoUrl = xuftonPictureUrl;
-                        }
-
                         if (string.IsNullOrEmpty(message)) continue;
-
+                        bool success;
                         foreach (var userId in userIds)
                         {
-                            bool success = await pictureSender.SendPictureAsync(userId, photoUrl, message, "7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA");
-                            _logger.LogInformation(success ? $"Notification sent successfully to {userId} [{i}]" : $"Notification wasn't sent to {userId} [{i}]");
+                            string language = userDetailsFromBLob
+                                .Where(u => long.Parse(u.UserID) == userId)
+                                .Select(u => u.Language)
+                                .FirstOrDefault();
+
+                            if (language == "Ru")
+                            {
+                                if (i == 5)
+                                {
+                                    photoUrl = bomdodPictureUrlRu;
+                                }
+                                else if (i == 6)
+                                {
+                                    photoUrl = quyoshPictureUrlRu;
+                                }
+                                else if (i == 7)
+                                {
+                                    photoUrl = peshinPictureUrlRu;
+                                }
+                                else if (i == 8)
+                                {
+                                    photoUrl = asrPictureUrlRu;
+                                }
+                                else if (i == 9)
+                                {
+                                    photoUrl = shomPictureUrlRu;
+                                }
+                                else
+                                {
+                                    photoUrl = xuftonPictureUrlRu;
+                                }
+                                success = await pictureSender.SendPictureAsync(userId, photoUrl, messageInRussian, "7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA");
+                                _logger.LogInformation(success ? $"Notification sent successfully to {userId} [{i}]" : $"Notification wasn't sent to {userId} [{i}] Russain");
+
+                            } 
+                            else
+                            {
+                                if (i == 5)
+                                {
+                                    photoUrl = bomdodPictureUrl;
+                                }
+                                else if (i == 6)
+                                {
+                                    photoUrl = quyoshPictureUrl;
+                                }
+                                else if (i == 7)
+                                {
+                                    photoUrl = peshinPictureUrl;
+                                }
+                                else if (i == 8)
+                                {
+                                    photoUrl = asrPictureUrl;
+                                }
+                                else if (i == 9)
+                                {
+                                    photoUrl = shomPictureUrl;
+                                }
+                                else
+                                {
+                                    photoUrl = xuftonPictureUrl;
+                                }
+                                success = await pictureSender.SendPictureAsync(userId, photoUrl, message, "7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA");
+                                _logger.LogInformation(success ? $"Notification sent successfully to {userId} [{i}]" : $"Notification wasn't sent to {userId} [{i}] Uzbek");
+
+                            }
                         }
 
                         _logger.LogInformation($"Notifications sent for {dailyPrayerTime[0]}");

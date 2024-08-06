@@ -39,9 +39,9 @@ namespace WebAPI
                     shouldBreak = false;
                     foreach (var item in dailyPrayerTimes)
                     {
-                        if (item?[0].ToString() == user.CityOfUser)
+                        if (item?[0].ToString() == user.CallBackQuery)
                         {
-                            if (!detailsOfUsers.TryGetValue(user.CityOfUser, out long[] userIds))
+                            if (!detailsOfUsers.TryGetValue(user.CallBackQuery, out long[] userIds))
                             {
                                 userIds = new long[] { };
                             }
@@ -51,7 +51,7 @@ namespace WebAPI
                             Array.Copy(userIds, newUserIds, userIds.Length);
                             newUserIds[newUserIds.Length - 1] = userId;
 
-                            detailsOfUsers[user.CityOfUser] = newUserIds;
+                            detailsOfUsers[user.CallBackQuery] = newUserIds;
                             shouldBreak = true;
                             break;
                         }
@@ -62,7 +62,7 @@ namespace WebAPI
                         continue;
                     }
 
-                    string cityName = user.CityOfUser?.First().ToString().ToUpper() + user.CityOfUser?.Substring(1).ToLower();
+                    string cityName = user.CallBackQuery?.First().ToString().ToUpper() + user.CallBackQuery?.Substring(1).ToLower();
                     string path = $"$.{cityName}[{month - 1}].monthData[{day - 1}]";
                     JToken value = jsonObject.SelectToken(path);
 
@@ -71,7 +71,7 @@ namespace WebAPI
                         continue;
                     }
 
-                    detailsOfUsers[user.CityOfUser] = new long[] { long.Parse(user.UserID) };
+                    detailsOfUsers[user.CallBackQuery] = new long[] { long.Parse(user.UserID) };
                     dailyPrayerTimes.Add(value);
                 }
             }

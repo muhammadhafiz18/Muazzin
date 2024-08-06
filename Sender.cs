@@ -51,7 +51,7 @@ namespace WebAPI
                 return false;
             }
         }
-        public async Task<bool> SendCityOfUserAsync(Message message, ILogger _logger, IConfiguration configuration)
+        public async Task<bool> SendCityOfUserAsync(Message message, ILogger _logger, IConfiguration configuration, string language)
         {
             string telegramBotToken = "7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA";
             var telegramApiUrl = $"https://api.telegram.org/bot{telegramBotToken}/editMessageText";
@@ -92,7 +92,7 @@ namespace WebAPI
                 // Parse the JSON string into a JObject
                 JObject jsonObject = JObject.Parse(jsonString);
 
-                string path = $"$.{message.From.CityOfUser.First().ToString().ToUpper() + message.From.CityOfUser.Substring(1).ToLower()}[{month - 1}].monthData[{day - 1}]";
+                string path = $"$.{message.From.CallBackQuery.First().ToString().ToUpper() + message.From.CallBackQuery.Substring(1).ToLower()}[{month - 1}].monthData[{day - 1}]";
 
                 // Select the token based on the path
                 JToken value = jsonObject.SelectToken(path);
@@ -116,23 +116,53 @@ namespace WebAPI
                     Magrib = value[9].ToString(),
                     Isha = value[10].ToString(),
                 };
-                string cityNameInLatin = CyrillicToLatinConverter.ConvertToLatin(prayerTimes.CityName);
 
                 var payload = new
                 {
-                    chat_id = message.From.UserID,
+                    chat_id = "",
                     message_id = message.MessageId,
-                    text = $"Bugun: {prayerTimes.DayInQamari}/{month}/{year}\n" +
-                            $"{cityNameInLatin} namoz vaqtlari:\n" +
-                            $"🏙 Bomdod: {prayerTimes.Fajr}\n" +
-                            $"🌅 Quyosh: {prayerTimes.Sunrise}\n" +
-                            $"🏞 Peshin: {prayerTimes.Zuhr}\n" +
-                            $"🌆 Asr: {prayerTimes.Asr}\n" +
-                            $"🌉 Shom: {prayerTimes.Magrib}\n" +
-                            $"🌃 Xufton: {prayerTimes.Isha}"
-    ,
+                    text = "",
                     reply_markup = new { inline_keyboard = new object[0] } // Empty inline keyboard to disable it
                 };
+
+                if (language == "Ru")
+                {
+                    payload = new
+                    {
+                        chat_id = message.From.UserID,
+                        message_id = message.MessageId,
+                        text = $"Сегодня: {prayerTimes.DayInQamari}/{month}/{year}\n" +
+                            $"{message.From.CallBackQuery} время молитвы:\n" +
+                            $"🏙 Фаджр: {prayerTimes.Fajr}\n" +
+                            $"🌅 Шурук: {prayerTimes.Sunrise}\n" +
+                            $"🏞 Зухр: {prayerTimes.Zuhr}\n" +
+                            $"🌆 Аср: {prayerTimes.Asr}\n" +
+                            $"🌉 Магриб: {prayerTimes.Magrib}\n" +
+                            $"🌃 Иша: {prayerTimes.Isha}"
+    ,
+                        reply_markup = new { inline_keyboard = new object[0] } // Empty inline keyboard to disable it
+                    };
+                }
+                else
+                {
+                    string cityNameInLatin = CyrillicToLatinConverter.ConvertToLatin(prayerTimes.CityName);
+
+                    payload = new
+                    {
+                        chat_id = message.From.UserID,
+                        message_id = message.MessageId,
+                        text = $"Bugun: {prayerTimes.DayInQamari}/{month}/{year}\n" +
+                        $"{cityNameInLatin} namoz vaqtlari:\n" +
+                        $"🏙 Bomdod: {prayerTimes.Fajr}\n" +
+                        $"🌅 Quyosh: {prayerTimes.Sunrise}\n" +
+                        $"🏞 Peshin: {prayerTimes.Zuhr}\n" +
+                        $"🌆 Asr: {prayerTimes.Asr}\n" +
+                        $"🌉 Shom: {prayerTimes.Magrib}\n" +
+                        $"🌃 Xufton: {prayerTimes.Isha}"
+,
+                        reply_markup = new { inline_keyboard = new object[0] } // Empty inline keyboard to disable it
+                    };
+                }
 
                 var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
 

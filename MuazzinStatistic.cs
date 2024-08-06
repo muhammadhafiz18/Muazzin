@@ -80,7 +80,7 @@ namespace WebAPI
                         messageToSend.AppendLine($"Last name: {user.LastName}");
                         messageToSend.AppendLine($"Username: {user.UserName}");
                         messageToSend.AppendLine($"UserId: {user.UserID}");
-                        messageToSend.AppendLine($"User's city: {user.CityOfUser}");
+                        messageToSend.AppendLine($"User's city: {user.CallBackQuery}");
                         messageToSend.AppendLine($"-----------------------------");
                     }
 

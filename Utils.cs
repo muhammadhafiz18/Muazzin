@@ -52,7 +52,7 @@ namespace WebAPI
                         FirstName = payload.callback_query.from.first_name,
                         LastName = payload.callback_query.from.last_name,
                         UserName = payload.callback_query.from.username,
-                        CityOfUser = payload.callback_query.data
+                        CallBackQuery = payload.callback_query.data
                     },
                 };
             }

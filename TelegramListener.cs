@@ -1,4 +1,4 @@
-﻿using Microsoft.Azure.Functions.Worker.Http;
+﻿/*using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
@@ -6,6 +6,8 @@ using WebAPI;
 using Microsoft.EntityFrameworkCore;
 using WebAPI.Models;
 using System;
+using Newtonsoft.Json;
+using System.Text;
 
 public class TelegramListener
 {
@@ -33,8 +35,35 @@ public class TelegramListener
         List<Chat> userDetailsFromJson = await userDetails.UserDetailGetter();
 
         var mainKeyboard = KeyboardBuilder.GetMainKeyboard();
+        var currentUser = userDetailsFromJson.FirstOrDefault(c => c.UserID == message.From.UserID);
         bool success;
-        if (message.Text == "/start")
+        if (message.From.CityOfUser != null && message.From.CityOfUser == "Ru" || message.From.CityOfUser == "Uz" && currentUser.CityOfUser == null)
+        {
+            string userIdToEdit = message.From.UserID;
+            string language = message.From.CityOfUser;
+
+            var chatToEdit = userDetailsFromJson.FirstOrDefault(c => c.UserID == userIdToEdit);
+            await userDetails.UserDetailRemover(chatToEdit);
+
+            chatToEdit.Language = language;
+            await userDetails.UserDetailAdder(chatToEdit);
+            var editMessageApiUrl = $"https://api.telegram.org/bot7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA/deleteMessage";
+
+            var editPayload = new
+            {
+                chat_id = message.From.UserID,
+                message_id = message.MessageId
+            };
+            var editContent = new StringContent(JsonConvert.SerializeObject(editPayload), Encoding.UTF8, "application/json");
+            await _httpClient.PostAsync(editMessageApiUrl, editContent);
+
+            var messageSender = new MessageSender(_logger, _configuration);
+            success = await messageSender.SendMessageAsync(long.Parse(message.From.UserID), $"Til/Язык: {language}", "7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA");
+
+            await messageSender.SendMessageAsync(long.Parse(message.From.UserID), "Here the locations will be appeared", "7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA");
+            await userDetails.UserDetailAdder(message.From);
+        }
+        else if (message.Text == "/start")
         {
             _logger.LogInformation("------------------------------------------------------------------------------");
             _logger.LogInformation($"'/start' is sent by {message.From.UserID} ({message.From.FirstName} {message.From.LastName}, ({message.From.UserName}))");
@@ -42,14 +71,27 @@ public class TelegramListener
             bool userExists = userDetailsFromJson.Any(c => c.UserID == message.From.UserID);
             if (userExists == false)
             {
-                await userDetails.UserDetailAdder(message.From);
-                var startTask = new StartTask();
-                success = await startTask.ChoosingCityNameAsync(message, _logger, _configuration, req);
+                var languageChooser = new LanguageChooser();
+                success = await languageChooser.LanguageChooserAsync(message, _logger, _configuration, long.Parse(message.From.UserID));
+
             }
             else
             {
                 var sender = new Sender();
                 success = await sender.SendMessageAsync(message, _logger, _configuration, null, "Xush kelibsiz", null, null, mainKeyboard);
+            }
+        }
+        else if (message.From.CityOfUser != null && message.From.CityOfUser.StartsWith("page_"))
+        {
+            var parts = message.From.CityOfUser.Split('_');
+            if (parts.Length == 2 && int.TryParse(parts[1], out int page))
+            {
+                var startTask = new StartTask();
+                success = await startTask.ChoosingCityNameAsync(message, _logger, _configuration, page);
+            }
+            else
+            {
+                success = false;
             }
         }
         else if (message.From.CityOfUser != null)
@@ -91,6 +133,7 @@ public class TelegramListener
                 await sender.SendMessageAsync(message, _logger, _configuration, "Sizning joylashuvingiz o'zgartirildi", null, null, null, mainKeyboard);
             }
         }
+
         else if (message.Text == "/location" || message.Text == "📍 Joylashuvni o'zgartirish")
         {
             _logger.LogInformation("------------------------------------------------------------------------------");
@@ -101,8 +144,10 @@ public class TelegramListener
 
             string currentCityOfUser = detailOfUser!.CityOfUser!;
 
-            var location = new LocationChanger();
-            success = await location.ChangingLocation(message, _logger, _configuration, currentCityOfUser);
+            message.MessageId = "";
+
+            var location = new StartTask();
+            success = await location.ChoosingCityNameAsync(message, _logger, _configuration, 1, currentCityOfUser);
             
         }
         else if (message.Text == "/feedback" || message.Text == "✍ Taklif va shikoyatlar uchun") {
@@ -121,6 +166,15 @@ public class TelegramListener
             var sender = new Sender();
             success = await sender.SendMessageAsync(message, _logger, _configuration, null, null, null, $"Umumiy foydalanuvchilar soni: {totalNumberOfUsers}\n\nUshbu botni yaqinlaringizgaham ulashing", mainKeyboard);
         }
+        else if (message.Text == "/language" || message.Text == "Tilni o'zgartirish" || message.Text == "изменение языка")
+        {
+            _logger.LogInformation("------------------------------------------------------------------------------");
+            _logger.LogInformation($"{message.From.FirstName} {message.From.LastName} {message.From.UserID} ({message.From.UserName}) is changing the language");
+            _logger.LogInformation("------------------------------------------------------------------------------");
+
+            var languageChooser = new LanguageChooser();
+            success = await languageChooser.LanguageChooserAsync(message, _logger, _configuration, long.Parse(message.From.UserID));
+        }
         else
         {
             _logger.LogInformation("------------------------------------------------------------------------------");
@@ -132,3 +186,4 @@ public class TelegramListener
         return response;
     }
 }
+*/
