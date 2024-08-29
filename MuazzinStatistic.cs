@@ -84,7 +84,7 @@ namespace WebAPI
                         messageToSend.AppendLine($"-----------------------------");
                     }
 
-                    success = await sender.SendMessageAsync(84285004, messageToSend.ToString(), "7337862823:AAH-ZOhYGJBU0uJOoX9BSl6AkBVp1RjMwYA");
+                    success = await sender.SendMessageAsync(84285004, messageToSend.ToString(), "YourBotTokenHere");
                 }
                 catch (Exception ex)
                 {
@@ -94,7 +94,7 @@ namespace WebAPI
             }
             else
             {
-                    success = await sender.SendMessageAsync(long.Parse(message.From.UserID), message.Text, "7337862823:AAH-ZOhYGJBU0uJOoX9BSl6AkBVp1RjMwYA");
+                    success = await sender.SendMessageAsync(long.Parse(message.From.UserID), message.Text, "YourBotTokenHere");
             }
 
             var response = req.CreateResponse(success ? System.Net.HttpStatusCode.OK : System.Net.HttpStatusCode.InternalServerError);

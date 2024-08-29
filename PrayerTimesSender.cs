@@ -19,7 +19,7 @@ namespace WebAPI
     {
         private static readonly HttpClient _httpClient = new HttpClient();
         private readonly BlobServiceClient _blobServiceClient;
-        private readonly string blobConnectionString = "DefaultEndpointsProtocol=https;AccountName=muazzinresources;AccountKey=IWrw0RDqCRVgLC/Vcd3PlMzl4eCxCQtxjPBkPsMps3wrnxfkAlX+vLTX+/BRxzY4MO07mLtfBhWH+AStKyIFXg==;EndpointSuffix=core.windows.net";
+        private readonly string blobConnectionString = "YourBlobConnectionStringHere";
         private readonly string containerName = "picsofprayers";
         private readonly IConfiguration _configuration;
         private readonly ILogger<PrayerTimesSender> _logger;
@@ -134,7 +134,7 @@ namespace WebAPI
                         message.AppendLine($"🌆 Аср: {dailyPrayerTime[8]}");
                         message.AppendLine($"🌉 Магриб: {dailyPrayerTime[9]}");
                         message.AppendLine($"🌃 Иша: {dailyPrayerTime[10]}\n\n@MuazzinUz_bot");
-                        success = await pictureSender.SendPictureAsync(userId, photoUrlRu, message.ToString(), "7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA");
+                        success = await pictureSender.SendPictureAsync(userId, photoUrlRu, message.ToString(), "YourBotTokenHere");
                         _logger.LogInformation(success ? $"Daily prayer times list sent successfully to {userId}" : $"Message wasn't sent to {userId}");
                     } 
                     else
@@ -149,7 +149,7 @@ namespace WebAPI
                         message.AppendLine($"🌆 Asr: {dailyPrayerTime[8]}");
                         message.AppendLine($"🌉 Shom: {dailyPrayerTime[9]}");
                         message.AppendLine($"🌃 Xufton: {dailyPrayerTime[10]}\n\n@MuazzinUz_bot");
-                        success = await pictureSender.SendPictureAsync(userId, photoUrl, message.ToString(), "7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA");
+                        success = await pictureSender.SendPictureAsync(userId, photoUrl, message.ToString(), "YourBotTokenHere");
                         _logger.LogInformation(success ? $"Daily prayer times list sent successfully to {userId}" : $"Message wasn't sent to {userId}");
 
                     }
@@ -181,7 +181,6 @@ namespace WebAPI
                         var message = new StringBuilder();
                         message.AppendLine($"Ассаляму алейкум. Сегодняшнее время молитвы {dailyPrayerTime[0].ToString()}а\n");
                         message.AppendLine($"Сегодня: {day}.{month}.2024\n");
-                        message.AppendLine($"Хижрий: {hijriDay}.{hijriMonth}.{hijriYear}\n");
                         message.AppendLine($"Время молитвы:");
                         message.AppendLine($"🏙 Фаджр: {dailyPrayerTime[5]}");
                         message.AppendLine($"🌅 Шурук: {dailyPrayerTime[6]}");
@@ -189,7 +188,7 @@ namespace WebAPI
                         message.AppendLine($"🌆 Аср: {dailyPrayerTime[8]}");
                         message.AppendLine($"🌉 Магриб: {dailyPrayerTime[9]}");
                         message.AppendLine($"🌃 Иша: {dailyPrayerTime[10]}\n\n@MuazzinUz_bot");
-                        success = await pictureSender.SendPictureAsync(userId, photoUrlRu, message.ToString(), "7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA");
+                        success = await pictureSender.SendPictureAsync(userId, photoUrlRu, message.ToString(), "YourBotTokenHere");
                         _logger.LogInformation(success ? $"Daily prayer times list sent successfully to {userId}" : $"Message wasn't sent to {userId}");
                     }
                     else
@@ -197,7 +196,6 @@ namespace WebAPI
                         var message = new StringBuilder();
                         message.AppendLine($"Assalomu alaykum. {cityNameInLatin}da bugungi namoz vaqtlari\n");
                         message.AppendLine($"Bugun: {day}.{month}.2024\n");
-                        message.AppendLine($"Hijriy: {hijriDay}.{hijriMonth}.{hijriYear}\n");
                         message.AppendLine($"Namoz vaqtlari:");
                         message.AppendLine($"🏙 Bomdod: {dailyPrayerTime[5]}");
                         message.AppendLine($"🌅 Quyosh: {dailyPrayerTime[6]}");
@@ -205,7 +203,7 @@ namespace WebAPI
                         message.AppendLine($"🌆 Asr: {dailyPrayerTime[8]}");
                         message.AppendLine($"🌉 Shom: {dailyPrayerTime[9]}");
                         message.AppendLine($"🌃 Xufton: {dailyPrayerTime[10]}\n\n@MuazzinUz_bot");
-                        success = await pictureSender.SendPictureAsync(userId, photoUrl, message.ToString(), "7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA");
+                        success = await pictureSender.SendPictureAsync(userId, photoUrl, message.ToString(), "YourBotTokenHere");
                         _logger.LogInformation(success ? $"Daily prayer times list sent successfully to {userId}" : $"Message wasn't sent to {userId}");
 
                     }
@@ -300,7 +298,7 @@ namespace WebAPI
                                 {
                                     photoUrl = xuftonPictureUrlRu;
                                 }
-                                success = await pictureSender.SendPictureAsync(userId, photoUrl, messageInRussian, "7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA");
+                                success = await pictureSender.SendPictureAsync(userId, photoUrl, messageInRussian, "YourBotTokenHere");
                                 _logger.LogInformation(success ? $"Notification sent successfully to {userId} [{i}]" : $"Notification wasn't sent to {userId} [{i}] Russain");
 
                             } 
@@ -330,7 +328,7 @@ namespace WebAPI
                                 {
                                     photoUrl = xuftonPictureUrl;
                                 }
-                                success = await pictureSender.SendPictureAsync(userId, photoUrl, message, "7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA");
+                                success = await pictureSender.SendPictureAsync(userId, photoUrl, message, "YourBotTokenHere");
                                 _logger.LogInformation(success ? $"Notification sent successfully to {userId} [{i}]" : $"Notification wasn't sent to {userId} [{i}] Uzbek");
 
                             }

@@ -87,7 +87,8 @@ public class TelegramLisstener
 
         else if (availableLanguages.Contains(message.From.CallBackQuery) && !string.IsNullOrEmpty(currentUser.CallBackQuery))
         {
-            string deleteMessageApiUrl = $"https://api.telegram.org/bot7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA/deleteMessage";
+            string botToken = "YourBotTokenHere";
+            string deleteMessageApiUrl = $"https://api.telegram.org/bot{botToken}/deleteMessage";
 
             var sender = new Sender();
 
@@ -123,7 +124,8 @@ public class TelegramLisstener
 
         else if (availableLanguages.Contains(message.From.CallBackQuery) && string.IsNullOrEmpty(currentUser.CallBackQuery))
         {
-            string deleteMessageApiUrl = $"https://api.telegram.org/bot7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA/deleteMessage";
+            string botToken = "YourBotTokenHere";
+            string deleteMessageApiUrl = $"https://api.telegram.org/bot{botToken}/deleteMessage";
             string userIdToEdit = message.From.UserID;
             string language = message.From.CallBackQuery;
 

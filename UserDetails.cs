@@ -15,10 +15,10 @@ namespace WebAPI
 {
     public class UserDetails
     {
-        string jsonUrl = "https://muazzinresources.blob.core.windows.net/userdetails/UserDetails.json";
+        string jsonUrl = "YourJSONUrlHere";
         private static readonly HttpClient _httpClient = new HttpClient();
         private readonly BlobServiceClient _blobServiceClient;
-        private readonly string blobConnectionString = "DefaultEndpointsProtocol=https;AccountName=muazzinresources;AccountKey=IWrw0RDqCRVgLC/Vcd3PlMzl4eCxCQtxjPBkPsMps3wrnxfkAlX+vLTX+/BRxzY4MO07mLtfBhWH+AStKyIFXg==;EndpointSuffix=core.windows.net";
+        private readonly string blobConnectionString = "YourBlobConnectionStringHere";
         private readonly string containerName = "userdetails";
         private readonly string blobName = "UserDetails.json";
 

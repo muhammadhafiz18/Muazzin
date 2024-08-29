@@ -16,7 +16,7 @@ namespace WebAPI
         private static readonly HttpClient _httpClient = new HttpClient();
         public async Task<bool> LanguageChooserAsync(Message message, ILogger _logger, IConfiguration configuration, long chatId)
         {
-            string telegramBotToken = "7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA";
+            string telegramBotToken = "YourBotTokenHere";
             var telegramApiUrl = $"https://api.telegram.org/bot{telegramBotToken}/sendMessage";
 
             var messageData = new

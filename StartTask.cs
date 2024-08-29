@@ -18,7 +18,7 @@ namespace WebAPI
 
         public async Task<bool> ChoosingCityNameAsync(Message message, ILogger _logger, IConfiguration configuration, string language, int page = 1, string currentCityOfUser = "")
         {
-            string telegramBotToken = "7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA";
+            string telegramBotToken = "YourBotTokenHere";
             var telegramApiUrl = $"https://api.telegram.org/bot{telegramBotToken}/sendMessage";
             var editMessageApiUrl = $"https://api.telegram.org/bot{telegramBotToken}/editMessageReplyMarkup";
 

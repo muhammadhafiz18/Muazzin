@@ -19,7 +19,7 @@ namespace WebAPI
             Dictionary<string, long[]> detailsOfUsers = new Dictionary<string, long[]>();
             bool shouldBreak = false;
 
-            string jsonUrl = "https://muazzinresources.blob.core.windows.net/timesofprayers/PrayerTimesOfUzbekistan.json.gz";
+            string jsonUrl = "YourJSONUrlOfPrayerTimesHere";
 
 
             // Fetching the compressed JSON file

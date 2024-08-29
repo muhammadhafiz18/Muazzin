@@ -19,7 +19,7 @@ namespace WebAPI
 
         public async Task<bool> SendMessageAsync(Message message, ILogger _logger, IConfiguration configuration, string? InfoAboutChangedLocation, string? Welcome, string? FeedbackSection, string? Statistic, string? replyMarkup = null)
         {
-            string telegramBotToken = "7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA";
+            string telegramBotToken = "YourBotTokenHere";
 
 
             var telegramApiUrl = $"https://api.telegram.org/bot{telegramBotToken}/sendMessage";
@@ -53,7 +53,7 @@ namespace WebAPI
         }
         public async Task<bool> SendCityOfUserAsync(Message message, ILogger _logger, IConfiguration configuration, string language)
         {
-            string telegramBotToken = "7263708391:AAEvRUGtiUcx2F1L1L0W0sjH-unyF__6OUA";
+            string telegramBotToken = "YourBotTokenHere";
             var telegramApiUrl = $"https://api.telegram.org/bot{telegramBotToken}/editMessageText";
 
             string timeZoneId = "Central Asia Standard Time";
@@ -71,7 +71,7 @@ namespace WebAPI
             int month = localTime.Month;
             int year = localTime.Year;
 
-            string jsonUrl = "https://muazzinresources.blob.core.windows.net/timesofprayers/PrayerTimesOfUzbekistan.json.gz";
+            string jsonUrl = "YourJSONURLOfPrayerTimesHere";
 
             // Fetching the compressed JSON file
             var response = await _httpClient.GetAsync(jsonUrl);
